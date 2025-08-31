@@ -16,6 +16,12 @@ document.addEventListener('DOMContentLoaded', () => {
                 return;
             }
 
+            const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+            if (!emailRegex.test(email)) {
+                messageDiv.textContent = 'Please enter a valid email address.';
+                return;
+            }
+
             try {
                 const response = await fetch('/register', {
                     method: 'POST',
