@@ -1,15 +1,15 @@
-version: '3.8'
 services:
   backend:
-    # Baue das Image aus dem Dockerfile im ./backend Verzeichnis
     build: ./backend
-    # Leite Port 3000 aus dem Container an Port 3000 auf deinem Host weiter
     ports:
       - "3000:3000"
-    # Setup für Entwicklung (ermöglicht Hot-Reloading, falls konfiguriert)
     volumes:
-      # Synchronisiere den Quellcode vom Host zum Container
       - ./backend:/app
-      # KRITISCH: Verhindere, dass das lokale (defekte) node_modules das
-      # saubere node_modules des Containers überschreibt
+      - /app/node_modules
+  frontend:
+    build: ./frontend
+    ports:
+      - "5173:5173"
+    volumes:
+      - ./frontend:/app
       - /app/node_modules
