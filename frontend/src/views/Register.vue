@@ -15,6 +15,7 @@
 <script setup lang="ts">
 import { ref } from 'vue';
 import { useRouter } from 'vue-router';
+import authService from '../services/authService';
 
 const username = ref('');
 const email = ref('');
@@ -23,21 +24,28 @@ const message = ref('');
 const router = useRouter();
 
 const handleRegister = async () => {
-  // Basic validation
-  if (password.value.length < 6) {
-    message.value = 'Das Passwort muss mindestens 6 Zeichen lang sein.';
-    return;
+  message.value = ''; // Reset message
+  try {
+    const userData = {
+      username: username.value,
+      email: email.value,
+      password: password.value,
+    };
+    await authService.register(userData);
+
+    message.value = 'Registrierung erfolgreich! Du wirst zum Login weitergeleitet...';
+    setTimeout(() => {
+      router.push('/login');
+    }, 2000);
+
+  } catch (error: any) {
+    console.error("Registrierung fehlgeschlagen:", error);
+    if (error.response && error.response.data && error.response.data.message) {
+      message.value = error.response.data.message;
+    } else {
+      message.value = 'Registrierung fehlgeschlagen. Bitte versuchen Sie es erneut.';
+    }
   }
-
-  // NOTE: API call will be implemented later with authService
-  console.log('Registering with:', username.value, email.value, password.value);
-  message.value = 'Registrierung erfolgreich! Du wirst zum Login weitergeleitet...';
-
-  // Placeholder for actual API call
-  // For now, we'll just simulate a successful registration and redirect.
-  setTimeout(() => {
-    router.push('/login');
-  }, 2000);
 };
 </script>
 

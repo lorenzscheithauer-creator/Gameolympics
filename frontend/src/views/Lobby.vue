@@ -11,22 +11,31 @@ import { ref, onMounted } from 'vue';
 import { useRouter } from 'vue-router';
 
 const router = useRouter();
-// In a real app, you'd get this from your auth store/token
 const username = ref('Benutzer');
 
 const handleLogout = () => {
   console.log('Logging out...');
   localStorage.removeItem('token');
+  localStorage.removeItem('user');
   router.push('/login');
 };
 
 onMounted(() => {
-  // This is where you would fetch user data if needed
-  // For now, we just use a placeholder username.
   const token = localStorage.getItem('token');
   if (!token) {
-    // This is a simple check. The router guard is the main protection.
     router.push('/login');
+  } else {
+    const storedUser = localStorage.getItem('user');
+    if (storedUser) {
+      try {
+        const user = JSON.parse(storedUser);
+        username.value = user.username;
+      } catch (e) {
+        console.error('Failed to parse user data from localStorage', e);
+        // If user data is corrupt, log out
+        handleLogout();
+      }
+    }
   }
 });
 </script>

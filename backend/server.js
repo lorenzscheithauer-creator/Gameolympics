@@ -1,5 +1,3 @@
-import dotenv from 'dotenv';
-dotenv.config();
 import express from 'express';
 import cors from 'cors';
 import path from 'path';
@@ -21,7 +19,7 @@ const __dirname = path.resolve();
 app.use(express.static(path.join(__dirname, '..', 'frontend')));
 
 // API Routes
-app.use('/', userRoutes); // Mount at root to match frontend calls like /login
+app.use('/api/users', userRoutes);
 
 // Error Handling Middleware
 app.use(notFound);
