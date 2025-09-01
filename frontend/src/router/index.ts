@@ -28,7 +28,7 @@ const router = createRouter({
 });
 
 // Navigation Guard
-router.beforeEach((to, from, next) => {
+router.beforeEach((to, _from, next) => {
   const isAuthenticated = !!localStorage.getItem('token'); // Check for token
 
   if (to.matched.some(record => record.meta.requiresAuth) && !isAuthenticated) {
