@@ -19,7 +19,12 @@ export const login = (credentials: any) => {
 // You could add more functions here, e.g., for fetching user data
 // or for adding the auth token to headers for protected requests.
 
+export const guestLogin = (nickname: string) => {
+  return apiClient.post('/guest-login', { nickname });
+};
+
 export default {
   register,
   login,
+  guestLogin,
 };
