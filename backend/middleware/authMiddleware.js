@@ -10,7 +10,7 @@ const protect = async (req, res, next) => {
       token = req.headers.authorization.split(' ')[1];
 
       // Verify token
-      const decoded = jwt.verify(token, 'your_jwt_secret'); // Use process.env.JWT_SECRET in production
+      const decoded = jwt.verify(token, process.env.JWT_SECRET);
 
       // Check if it's a guest token
       if (decoded.isGuest) {

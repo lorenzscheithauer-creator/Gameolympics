@@ -1,6 +1,7 @@
 import sqlite3 from 'sqlite3';
 
-const db = new sqlite3.Database('./database.db', (err) => {
+const dbPath = process.env.DATABASE_PATH || './database.db';
+const db = new sqlite3.Database(dbPath, (err) => {
     if (err) {
         // In a real app, you'd want to handle this more gracefully
         // For now, logging and exiting is sufficient to see the error.
