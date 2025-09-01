@@ -1,3 +1,4 @@
+import { validationResult } from 'express-validator';
 import bcrypt from 'bcrypt';
 import jwt from 'jsonwebtoken';
 import db from '../config/db.js';
@@ -7,13 +8,13 @@ import generateToken from '../utils/generateToken.js';
 // @route   POST /api/users/register
 // @access  Public
 const registerUser = async (req, res, next) => {
+    const errors = validationResult(req);
+    if (!errors.isEmpty()) {
+        return res.status(400).json({ errors: errors.array() });
+    }
+
     try {
         const { username, email, password } = req.body;
-
-        if (!username || !email || !password) {
-            res.status(400);
-            throw new Error('Please add all fields');
-        }
 
         const sqlCheck = `SELECT * FROM users WHERE username = ? OR email = ?`;
         db.get(sqlCheck, [username, email], async (err, user) => {
@@ -52,6 +53,11 @@ const registerUser = async (req, res, next) => {
 // @route   POST /api/users/login
 // @access  Public
 const authUser = async (req, res, next) => {
+    const errors = validationResult(req);
+    if (!errors.isEmpty()) {
+        return res.status(400).json({ errors: errors.array() });
+    }
+
     try {
         const { username, password } = req.body; // Can be username or email
 
@@ -90,7 +96,7 @@ const loginGuest = (req, res, next) => {
             throw new Error('Please provide a nickname');
         }
         // For guests, we can generate a "guest" token with limited info
-        const guestToken = jwt.sign({ nickname, isGuest: true }, 'your_jwt_secret', { expiresIn: '1h' });
+        const guestToken = jwt.sign({ nickname, isGuest: true }, process.env.JWT_SECRET, { expiresIn: '1h' });
         res.json({
             nickname: nickname,
             isGuest: true,
