@@ -26,10 +26,11 @@ const registerUser = async (req, res, next) => {
 
         if (existingUser) {
             res.status(409);
-            const message = existingUser.username === username
-                ? 'Benutzername oder E-Mail bereits vergeben.'
-                : 'Benutzername oder E-Mail bereits vergeben.';
-            return next(new Error(message));
+            if (existingUser.username === username) {
+                return next(new Error('Dieser Benutzername ist bereits vergeben.'));
+            } else {
+                return next(new Error('Diese E-Mail-Adresse wird bereits verwendet.'));
+            }
         }
 
         const salt = await bcrypt.genSalt(10);
