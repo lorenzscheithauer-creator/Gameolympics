@@ -111,7 +111,7 @@ const loginGuest = (req, res, next) => {
             throw new Error('Please provide a nickname');
         }
         // For guests, we can generate a "guest" token with limited info
-        const guestToken = jwt.sign({ nickname, isGuest: true }, 'your_jwt_secret', { expiresIn: '1h' });
+        const guestToken = jwt.sign({ nickname, isGuest: true }, process.env.JWT_SECRET, { expiresIn: '1h' });
         res.json({
             nickname: nickname,
             isGuest: true,
