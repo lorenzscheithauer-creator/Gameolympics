@@ -1,41 +1,13 @@
-<!DOCTYPE html>
-<html lang="de">
-<head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Willkommen!</title>
-    <style>
-        body { font-family: sans-serif; display: flex; justify-content: center; align-items: center; height: 100vh; flex-direction: column; background-color: #f0f2f5; }
-        .container { text-align: center; background: white; padding: 40px; border-radius: 8px; box-shadow: 0 4px 8px rgba(0,0,0,0.1); }
-        h1 { margin-bottom: 30px; }
-        h2 { margin-top: 20px; margin-bottom: 15px; color: #333; }
-        input[type="text"] { padding: 10px; width: 200px; border: 1px solid #ccc; border-radius: 4px; }
-        button, .btn { padding: 10px 20px; font-size: 16px; margin: 5px; cursor: pointer; border: none; border-radius: 4px; text-decoration: none; color: white; }
-        button { background-color: #007bff; }
-        button:hover { background-color: #0056b3; }
-        .btn-secondary { background-color: #6c757d; }
-        .btn-secondary:hover { background-color: #5a6268; }
-        hr { width: 80%; margin: 30px auto; border: 0; border-top: 1px solid #ccc; }
-        .auth-links a { display: inline-block; margin: 0 10px; }
-    </style>
-</head>
-<body>
-    <div class="container">
-        <h1>Willkommen zum Spiel</h1>
-        <div class="guest-login">
-            <h2>Als Gast spielen</h2>
-            <form id="guest-form">
-                <input type="text" id="nickname" placeholder="Spitzname eingeben" required>
-                <button type="submit">Spielen</button>
-            </form>
-        </div>
-        <hr>
-        <div class="auth-links">
-            <h2>Anmelden oder Registrieren</h2>
-            <a href="login.html" class="btn btn-secondary">Anmelden</a>
-            <a href="register.html" class="btn btn-secondary">Registrieren</a>
-        </div>
-    </div>
-    <script src="js/main.js"></script>
-</body>
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <link rel="icon" type="image/svg+xml" href="/vite.svg" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Vite + Vue + TS</title>
+  </head>
+  <body>
+    <div id="app"></div>
+    <script type="module" src="/src/main.ts"></script>
+  </body>
 </html>
