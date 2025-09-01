@@ -4,11 +4,9 @@ services:
     ports:
       - "3000:3000"
     volumes:
-volumes:
-  - ./backend:/app
-  - /app/node_modules  # <-- Diese Zeile hinzufügen
-  - gameolympics-data:/app/data
-    # Wir geben dem Container die .env-Datei mit den Geheimnissen
+      - ./backend:/app
+      - /app/node_modules
+      - gameolympics-data:/app/data
     env_file:
       - ./backend/.env
 
@@ -20,6 +18,5 @@ volumes:
       - ./frontend:/app
       - /app/node_modules
 
-# Hier definieren wir den sicheren Speicherort für die Datenbank
 volumes:
   gameolympics-data:
