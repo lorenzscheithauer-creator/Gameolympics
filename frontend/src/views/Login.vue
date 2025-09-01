@@ -14,7 +14,6 @@
 <script setup lang="ts">
 import { ref } from 'vue';
 import { useRouter } from 'vue-router';
-import authService from '../services/authService';
 
 const email = ref('');
 const password = ref('');
@@ -22,26 +21,18 @@ const message = ref('');
 const router = useRouter();
 
 const handleLogin = async () => {
-  message.value = ''; // Reset message on new login attempt
-  try {
-    const credentials = { username: email.value, password: password.value };
-    const response = await authService.login(credentials);
+  // NOTE: API call will be implemented later with authService
+  console.log('Logging in with:', email.value, password.value);
 
-    // Store token and user data
-    localStorage.setItem('token', response.data.token);
-    localStorage.setItem('user', JSON.stringify(response.data.user));
+  // Placeholder for actual API call
+  // For now, we'll just simulate a successful login and redirect.
+  // In reality, we would store the token here.
+  localStorage.setItem('token', 'dummy_token_for_dev'); // Simulate token
+  message.value = 'Login erfolgreich! Du wirst zur Lobby weitergeleitet...';
 
-    // Redirect to lobby
+  setTimeout(() => {
     router.push('/');
-
-  } catch (error: any) {
-    console.error("Login fehlgeschlagen:", error);
-    if (error.response && error.response.data && error.response.data.message) {
-        message.value = error.response.data.message;
-    } else {
-        message.value = 'Login fehlgeschlagen. Bitte versuchen Sie es erneut.';
-    }
-  }
+  }, 2000);
 };
 </script>
 

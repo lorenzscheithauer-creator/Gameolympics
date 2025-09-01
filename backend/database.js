@@ -1,4 +1,4 @@
-import sqlite3 from 'sqlite3';
+const sqlite3 = require('sqlite3').verbose();
 
 // open the database
 let db = new sqlite3.Database('./database.db', (err) => {

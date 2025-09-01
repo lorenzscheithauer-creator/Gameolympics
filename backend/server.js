@@ -19,7 +19,7 @@ const __dirname = path.resolve();
 app.use(express.static(path.join(__dirname, '..', 'frontend')));
 
 // API Routes
-app.use('/api/users', userRoutes);
+app.use('/', userRoutes); // Mount at root to match frontend calls like /login
 
 // Error Handling Middleware
 app.use(notFound);
