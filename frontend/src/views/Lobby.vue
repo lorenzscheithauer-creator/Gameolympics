@@ -19,8 +19,11 @@
     <div class="lobby-list-container">
       <div v-if="lobbies.length > 0" class="lobby-list">
         <div v-for="lobby in lobbies" :key="lobby.lobbyCode" class="lobby-item" @click="handleLobbyClick(lobby)">
-          <span class="host-name">Lobby von {{ lobby.hostName }}</span>
-          <span class="player-count">{{ lobby.playerCount }}/{{ lobby.maxPlayers }} Spieler</span>
+          <div class="lobby-info">
+            <span class="lobby-name">{{ lobby.lobbyName }}</span>
+            <span class="lobby-code">Code: {{ lobby.lobbyCode }}</span>
+          </div>
+          <span class="player-count">{{ lobby.playerCount }}/{{ lobby.maxPlayers }}</span>
         </div>
       </div>
       <div v-else class="no-lobbies-message">
@@ -45,7 +48,7 @@ import lobbyService from '../services/lobbyService';
 
 interface Lobby {
   lobbyCode: string;
-  hostName: string;
+  lobbyName: string;
   playerCount: number;
   maxPlayers: number;
 }
@@ -69,13 +72,11 @@ const fetchLobbies = async () => {
   }
 };
 
-// Open the Join modal without a pre-filled code
 const handleJoinClick = () => {
   selectedLobbyCode.value = '';
   showJoinModal.value = true;
 };
 
-// Open the Join modal with a pre-filled code from the list
 const handleLobbyClick = (lobby: Lobby) => {
   selectedLobbyCode.value = lobby.lobbyCode;
   showJoinModal.value = true;
@@ -94,7 +95,6 @@ onUnmounted(() => {
 </script>
 
 <style scoped>
-/* Styles are unchanged */
 .page-container {
   display: flex;
   flex-direction: column;
@@ -219,12 +219,31 @@ onUnmounted(() => {
   transform: translateY(-2px);
 }
 
-.host-name {
+.lobby-info {
+  display: flex;
+  flex-direction: column;
+  align-items: flex-start;
+}
+
+.lobby-name {
   font-weight: bold;
+  font-size: 1.1rem;
+  margin-bottom: 0.25rem;
+}
+
+.lobby-code {
+  font-family: monospace;
+  font-size: 0.9rem;
+  color: #555;
+  background-color: #eee;
+  padding: 0.2rem 0.4rem;
+  border-radius: 4px;
 }
 
 .player-count {
-  color: #666;
+  font-weight: bold;
+  font-size: 1.1rem;
+  color: #333;
 }
 
 .no-lobbies-message {

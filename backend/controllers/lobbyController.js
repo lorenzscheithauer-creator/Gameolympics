@@ -1,7 +1,12 @@
 import bcrypt from 'bcrypt';
 import lobbies from '../data/lobbies.js';
 
-const MAX_PLAYERS = 8;
+const MAX_PLAYERS = 6;
+
+// Helper function to check if a player is already in any lobby
+const isPlayerInAnyLobby = (playerId) => {
+  return lobbies.some(lobby => lobby.players.some(player => player.id === playerId));
+};
 
 // A simple utility to generate a random 6-character code
 const generateLobbyCode = () => {
@@ -14,7 +19,7 @@ const generateLobbyCode = () => {
 };
 
 // @desc    Get all public, non-full lobbies
-// @route   GET /api/lobbies
+// @route   GET /api/lobbies/list
 // @access  Public
 const getPublicLobbies = async (req, res, next) => {
   try {
@@ -22,7 +27,8 @@ const getPublicLobbies = async (req, res, next) => {
       .filter(l => l.isPublic && l.players.length < MAX_PLAYERS)
       .map(l => ({
         lobbyCode: l.lobbyCode,
-        hostName: l.players[0]?.username || 'Unknown', // The first player is the host
+        lobbyName: l.lobbyName,
+        hostName: l.players[0]?.username || 'Unknown',
         playerCount: l.players.length,
         maxPlayers: MAX_PLAYERS,
       }));
@@ -34,19 +40,28 @@ const getPublicLobbies = async (req, res, next) => {
 
 // @desc    Create a new lobby
 // @route   POST /api/lobbies/create
-// @access  Private (TODO: Add auth middleware)
+// @access  Private
 const createLobby = async (req, res, next) => {
   try {
-    const { isPublic, password } = req.body;
-    const creatingPlayer = { id: 'player1', username: 'HostPlayer' }; // Placeholder
+    const { isPublic, password, lobbyName } = req.body;
+    const user = req.user;
+
+    // 1. Player Exclusivity Check
+    if (isPlayerInAnyLobby(user.id)) {
+      res.status(400);
+      throw new Error('You are already in a lobby.');
+    }
 
     if (isPublic === undefined) {
       res.status(400);
       throw new Error('Please specify if the lobby is public or private.');
     }
 
+    const creatingPlayer = { id: user.id, username: user.username };
+
     const newLobby = {
       lobbyCode: generateLobbyCode(),
+      lobbyName: lobbyName || `${user.username}'s Lobby`,
       isPublic: isPublic,
       players: [creatingPlayer],
       passwordHash: null,
@@ -76,11 +91,17 @@ const createLobby = async (req, res, next) => {
 
 // @desc    Join a lobby with a code
 // @route   POST /api/lobbies/join
-// @access  Private (TODO: Add auth middleware)
+// @access  Private
 const joinLobby = async (req, res, next) => {
   try {
     const { lobbyCode, password } = req.body;
-    const joiningPlayer = { id: 'player2', username: 'JoiningPlayer' }; // Placeholder
+    const user = req.user;
+
+    // 1. Player Exclusivity Check
+    if (isPlayerInAnyLobby(user.id)) {
+      res.status(400);
+      throw new Error('You are already in a lobby.');
+    }
 
     if (!lobbyCode) {
       res.status(400);
@@ -111,6 +132,7 @@ const joinLobby = async (req, res, next) => {
       }
     }
 
+    const joiningPlayer = { id: user.id, username: user.username };
     lobby.players.push(joiningPlayer);
     console.log(`Player joined lobby ${lobbyCode}. Lobbies:`, lobbies);
 
@@ -123,10 +145,16 @@ const joinLobby = async (req, res, next) => {
 
 // @desc    Join a random public lobby
 // @route   POST /api/lobbies/join/random
-// @access  Private (TODO: Add auth middleware)
+// @access  Private
 const joinRandomLobby = async (req, res, next) => {
   try {
-    const joiningPlayer = { id: 'player3', username: 'RandomPlayer' }; // Placeholder
+    const user = req.user;
+
+    // 1. Player Exclusivity Check
+    if (isPlayerInAnyLobby(user.id)) {
+      res.status(400);
+      throw new Error('You are already in a lobby.');
+    }
 
     const availableLobbies = lobbies.filter(l => l.isPublic && l.players.length < MAX_PLAYERS);
 
@@ -136,6 +164,7 @@ const joinRandomLobby = async (req, res, next) => {
     }
 
     const randomLobby = availableLobbies[Math.floor(Math.random() * availableLobbies.length)];
+    const joiningPlayer = { id: user.id, username: user.username };
     randomLobby.players.push(joiningPlayer);
 
     console.log(`Player joined random lobby ${randomLobby.lobbyCode}. Lobbies:`, lobbies);

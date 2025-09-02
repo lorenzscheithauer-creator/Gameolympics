@@ -9,7 +9,7 @@ const apiClient = axios.create({
   },
 });
 
-export const createLobby = (lobbyData: { isPublic: boolean; password?: string }) => {
+export const createLobby = (lobbyData: { lobbyName: string; isPublic: boolean; password?: string }) => {
   return apiClient.post('/create', lobbyData);
 };
 
