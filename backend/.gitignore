@@ -1,13 +1,2 @@
 node_modules/
 database.db
-
-# Environment variables
-.env
-
-# OS-generated files
-.DS_Store
-Thumbs.db
-
-# IDE-specific folders
-.vscode/
-.idea/
