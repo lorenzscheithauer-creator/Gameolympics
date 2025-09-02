@@ -1,160 +1,150 @@
 <template>
-  <div class="lobby-container">
-    <header class="lobby-header">
-      <h1>Gameolympics</h1>
-    </header>
-
-    <main class="main-content">
-      <div class="game-selection-area">
-        <div class="game-grid">
-          <div v-for="n in 8" :key="n" class="game-tile"></div>
-        </div>
-        <div class="wheel-of-fortune">
-          <!-- Placeholder for wheel image -->
-        </div>
-      </div>
-    </main>
-
-    <footer class="lobby-display">
-      <div class="lobby-header-bar">
-        <h2>Lobby</h2>
-        <button @click="toggleLobbyType" class="toggle-button">
-          <span class="toggle-text">
-            <span v-if="isPublic">Öffentlich</span>
-            <span v-else>Privat</span>
-          </span>
-          <!-- Placeholders for icons -->
+  <div class="page-container">
+    <h1 class="main-title">Gameolympics</h1>
+    <div class="games-section">
+      <div class="games-grid">
+        <button v-for="i in 8" :key="i" class="game-button" @click="logGameClick(i)">
+          Game{{ i }}
         </button>
       </div>
-      <div class="lobby-grid">
-        <div v-for="n in 12" :key="n" class="lobby-tile"></div>
+      <div class="wheel-placeholder"></div>
+    </div>
+    <div class="lobby-section">
+      <h2 class="lobby-title">Lobby</h2>
+      <div class="lobby-actions">
+        <button class="action-button create-button" @click="showCreateModal = true">Create Lobby</button>
+        <button class="action-button join-button" @click="showJoinModal = true">Join Lobby</button>
       </div>
-    </footer>
+    </div>
+    <div class="lobby-grid-container">
+       <div v-for="n in 12" :key="n" class="lobby-tile-placeholder"></div>
+    </div>
+
+    <!-- Modals will be added here in later steps -->
+    <CreateLobbyModal v-if="showCreateModal" @close="showCreateModal = false" />
+    <JoinLobbyModal v-if="showJoinModal" @close="showJoinModal = false" />
   </div>
 </template>
 
 <script setup lang="ts">
 import { ref } from 'vue';
+import CreateLobbyModal from '../components/CreateLobbyModal.vue';
+// Modal components will be imported here later
+import JoinLobbyModal from '../components/JoinLobbyModal.vue';
 
-const isPublic = ref(true);
+const showCreateModal = ref(false);
+const showJoinModal = ref(false);
 
-const toggleLobbyType = () => {
-  isPublic.value = !isPublic.value;
+const logGameClick = (gameNumber: number) => {
+  console.log(`Game ${gameNumber} clicked`);
 };
-
-// Note: Logout functionality is removed to match the mockup exactly.
-// If needed, it can be re-added.
 </script>
 
 <style scoped>
-/* Applying background color to the root element of the component */
-.lobby-container {
+.page-container {
   display: flex;
   flex-direction: column;
   align-items: center;
   padding: 2rem;
+  background-color: #FDFBF5; /* Creamy off-white from mockup */
   min-height: 100vh;
-  box-sizing: border-box;
-  background-color: #FDFBF5; /* Creamy off-white background */
   font-family: 'Helvetica Neue', Arial, sans-serif;
 }
 
-.lobby-header {
-  width: 100%;
-  text-align: center;
-  margin-bottom: 2rem; /* Adjusted margin */
-}
-
-.lobby-header h1 {
-  font-size: 3.5rem; /* Slightly larger font */
+.main-title {
+  font-size: 3.5rem;
   font-weight: bold;
   color: #333;
+  margin-bottom: 3rem;
 }
 
-.main-content {
-  /* This container is less necessary with the flex alignment on the parent */
-  margin-bottom: 3rem; /* Adjusted margin */
-}
-
-.game-selection-area {
+.games-section {
   display: flex;
-  align-items: center;
   justify-content: center;
-  gap: 3rem; /* Increased gap */
+  align-items: flex-start;
+  gap: 3rem;
+  margin-bottom: 3rem;
 }
 
-.game-grid {
+.games-grid {
   display: grid;
   grid-template-columns: repeat(4, 1fr);
   gap: 1.5rem;
 }
 
-.game-tile {
-  width: 110px; /* Adjusted size */
-  height: 110px; /* Adjusted size */
+.game-button {
+  width: 120px;
+  height: 120px;
   background-color: black;
+  color: white;
+  border: none;
+  border-radius: 8px;
+  font-size: 1.2rem;
+  font-weight: bold;
   cursor: pointer;
-}
-
-.wheel-of-fortune {
-  width: 160px; /* Adjusted size */
-  height: 160px; /* Adjusted size */
-  background-color: #E0E0E0; /* Light gray placeholder color */
-  border-radius: 50%;
   display: flex;
   justify-content: center;
   align-items: center;
-  cursor: pointer;
-  color: #888;
-  font-size: 1.2rem;
-  border: 4px solid #C0C0C0; /* Added border to look more like a wheel */
 }
 
-.lobby-display {
+.wheel-placeholder {
+  width: 160px;
+  height: 160px;
+  background-color: #E0E0E0;
+  border-radius: 50%;
+  border: 4px solid #C0C0C0;
+}
+
+.lobby-section {
   width: 100%;
-  max-width: 980px; /* Adjusted max-width */
-}
-
-.lobby-header-bar {
+  max-width: 980px;
   display: flex;
   justify-content: space-between;
   align-items: center;
   margin-bottom: 1.5rem;
-  padding: 0 0.5rem; /* Adjusted padding */
 }
 
-.lobby-header-bar h2 {
-  font-size: 2.5rem; /* Larger font */
+.lobby-title {
+  font-size: 2.5rem;
   color: #333;
   margin: 0;
 }
 
-.toggle-button {
-  background-color: #3cb371; /* Greenish color */
+.lobby-actions {
+  display: flex;
+  gap: 1rem;
+}
+
+.action-button {
   color: white;
   border: none;
   border-radius: 50px;
-  padding: 0.75rem 2rem; /* Adjusted padding */
+  padding: 0.75rem 2rem;
   font-size: 1rem;
   font-weight: bold;
   cursor: pointer;
-  display: flex;
-  align-items: center;
-  gap: 0.5rem;
-  min-width: 160px; /* Adjusted min-width */
-  justify-content: center;
   box-shadow: 0 2px 4px rgba(0,0,0,0.1);
 }
 
-.lobby-grid {
+.create-button {
+  background-color: #3cb371; /* Green */
+}
+
+.join-button {
+  background-color: #4a90e2; /* Blue */
+}
+
+.lobby-grid-container {
+  width: 100%;
+  max-width: 980px;
   display: grid;
   grid-template-columns: repeat(6, 1fr);
   gap: 1rem;
 }
 
-.lobby-tile {
-  height: 50px; /* Adjusted height */
-  background-color: #d9534f; /* A more muted red */
+.lobby-tile-placeholder {
+  height: 50px;
+  background-color: #d9534f;
   border-radius: 4px;
 }
 </style>

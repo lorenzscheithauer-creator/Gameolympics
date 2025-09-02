@@ -2,6 +2,7 @@ import express from 'express';
 import cors from 'cors';
 import path from 'path';
 import userRoutes from './routes/userRoutes.js';
+import lobbyRoutes from './routes/lobbyRoutes.js';
 import { notFound, errorHandler } from './middleware/errorMiddleware.js';
 import db from './config/db.js'; // Import to initialize the db connection
 
@@ -20,6 +21,7 @@ app.use(express.static(path.join(__dirname, '..', 'frontend')));
 
 // API Routes
 app.use('/api/users', userRoutes);
+app.use('/api/lobbies', lobbyRoutes);
 
 // Error Handling Middleware
 app.use(notFound);
