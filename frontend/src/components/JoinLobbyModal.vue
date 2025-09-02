@@ -17,7 +17,7 @@
         </button>
       </div>
       <div v-if="joinType === 'code'" class="code-section">
-        <input type="text" v-model="lobbyCode" placeholder="Lobby-Code" />
+        <input type="text" v-model="lobbyCodeInput" placeholder="Lobby-Code" />
         <input type="password" v-model="password" placeholder="Passwort (falls benötigt)" />
       </div>
       <div v-if="errorMessage" class="error-message">{{ errorMessage }}</div>
@@ -30,15 +30,26 @@
 </template>
 
 <script setup lang="ts">
-import { ref } from 'vue';
+import { ref, onMounted } from 'vue';
 import lobbyService from '../services/lobbyService';
 
+const props = defineProps<{
+  initialLobbyCode?: string;
+}>();
+
+const emit = defineEmits(['close']);
+
 const joinType = ref('code');
-const lobbyCode = ref('');
+const lobbyCodeInput = ref('');
 const password = ref('');
 const errorMessage = ref('');
 
-const emit = defineEmits(['close']);
+onMounted(() => {
+  if (props.initialLobbyCode) {
+    joinType.value = 'code';
+    lobbyCodeInput.value = props.initialLobbyCode;
+  }
+});
 
 const setJoinType = (type: 'code' | 'random') => {
   joinType.value = type;
@@ -51,11 +62,11 @@ const handleJoinLobby = async () => {
     if (joinType.value === 'random') {
       response = await lobbyService.joinRandomLobby();
     } else {
-      if (!lobbyCode.value) {
+      if (!lobbyCodeInput.value) {
         errorMessage.value = 'Lobby code is required.';
         return;
       }
-      const joinData: { lobbyCode: string; password?: string } = { lobbyCode: lobbyCode.value };
+      const joinData: { lobbyCode: string; password?: string } = { lobbyCode: lobbyCodeInput.value };
       if (password.value) {
         joinData.password = password.value;
       }
@@ -64,7 +75,7 @@ const handleJoinLobby = async () => {
 
     console.log('Lobby joined:', response.data);
     alert(`Successfully joined lobby: ${response.data.lobby.lobbyCode}`);
-    emit('close'); // Close the modal on success
+    emit('close');
 
   } catch (error: any) {
     console.error('Failed to join lobby:', error);
@@ -74,6 +85,7 @@ const handleJoinLobby = async () => {
 </script>
 
 <style scoped>
+/* Styles are unchanged, but included for completeness */
 .modal-overlay {
   position: fixed;
   top: 0;

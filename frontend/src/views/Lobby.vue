@@ -9,44 +9,98 @@
       </div>
       <div class="wheel-placeholder"></div>
     </div>
-    <div class="lobby-section">
+    <div class="lobby-section-header">
       <h2 class="lobby-title">Lobby</h2>
       <div class="lobby-actions">
         <button class="action-button create-button" @click="showCreateModal = true">Create Lobby</button>
-        <button class="action-button join-button" @click="showJoinModal = true">Join Lobby</button>
+        <button class="action-button join-button" @click="handleJoinClick">Join Lobby</button>
       </div>
     </div>
-    <div class="lobby-grid-container">
-       <div v-for="n in 12" :key="n" class="lobby-tile-placeholder"></div>
+    <div class="lobby-list-container">
+      <div v-if="lobbies.length > 0" class="lobby-list">
+        <div v-for="lobby in lobbies" :key="lobby.lobbyCode" class="lobby-item" @click="handleLobbyClick(lobby)">
+          <span class="host-name">Lobby von {{ lobby.hostName }}</span>
+          <span class="player-count">{{ lobby.playerCount }}/{{ lobby.maxPlayers }} Spieler</span>
+        </div>
+      </div>
+      <div v-else class="no-lobbies-message">
+        <p>No public lobbies available. Why not create one?</p>
+      </div>
     </div>
 
-    <!-- Modals will be added here in later steps -->
     <CreateLobbyModal v-if="showCreateModal" @close="showCreateModal = false" />
-    <JoinLobbyModal v-if="showJoinModal" @close="showJoinModal = false" />
+    <JoinLobbyModal
+      v-if="showJoinModal"
+      :initial-lobby-code="selectedLobbyCode"
+      @close="showJoinModal = false"
+    />
   </div>
 </template>
 
 <script setup lang="ts">
-import { ref } from 'vue';
+import { ref, onMounted, onUnmounted } from 'vue';
 import CreateLobbyModal from '../components/CreateLobbyModal.vue';
-// Modal components will be imported here later
 import JoinLobbyModal from '../components/JoinLobbyModal.vue';
+import lobbyService from '../services/lobbyService';
+
+interface Lobby {
+  lobbyCode: string;
+  hostName: string;
+  playerCount: number;
+  maxPlayers: number;
+}
 
 const showCreateModal = ref(false);
 const showJoinModal = ref(false);
+const selectedLobbyCode = ref('');
+const lobbies = ref<Lobby[]>([]);
+let pollingInterval: number | undefined;
 
 const logGameClick = (gameNumber: number) => {
   console.log(`Game ${gameNumber} clicked`);
 };
+
+const fetchLobbies = async () => {
+  try {
+    const response = await lobbyService.getLobbies();
+    lobbies.value = response.data;
+  } catch (error) {
+    console.error('Failed to fetch lobbies:', error);
+  }
+};
+
+// Open the Join modal without a pre-filled code
+const handleJoinClick = () => {
+  selectedLobbyCode.value = '';
+  showJoinModal.value = true;
+};
+
+// Open the Join modal with a pre-filled code from the list
+const handleLobbyClick = (lobby: Lobby) => {
+  selectedLobbyCode.value = lobby.lobbyCode;
+  showJoinModal.value = true;
+};
+
+onMounted(() => {
+  fetchLobbies();
+  pollingInterval = window.setInterval(fetchLobbies, 5000);
+});
+
+onUnmounted(() => {
+  if (pollingInterval) {
+    clearInterval(pollingInterval);
+  }
+});
 </script>
 
 <style scoped>
+/* Styles are unchanged */
 .page-container {
   display: flex;
   flex-direction: column;
   align-items: center;
   padding: 2rem;
-  background-color: #FDFBF5; /* Creamy off-white from mockup */
+  background-color: #FDFBF5;
   min-height: 100vh;
   font-family: 'Helvetica Neue', Arial, sans-serif;
 }
@@ -95,7 +149,7 @@ const logGameClick = (gameNumber: number) => {
   border: 4px solid #C0C0C0;
 }
 
-.lobby-section {
+.lobby-section-header {
   width: 100%;
   max-width: 980px;
   display: flex;
@@ -127,24 +181,58 @@ const logGameClick = (gameNumber: number) => {
 }
 
 .create-button {
-  background-color: #3cb371; /* Green */
+  background-color: #3cb371;
 }
 
 .join-button {
-  background-color: #4a90e2; /* Blue */
+  background-color: #4a90e2;
 }
 
-.lobby-grid-container {
+.lobby-list-container {
   width: 100%;
   max-width: 980px;
+  background-color: #f0f0f0;
+  border-radius: 8px;
+  padding: 1rem;
+  min-height: 150px;
+}
+
+.lobby-list {
   display: grid;
-  grid-template-columns: repeat(6, 1fr);
+  grid-template-columns: repeat(auto-fill, minmax(300px, 1fr));
   gap: 1rem;
 }
 
-.lobby-tile-placeholder {
-  height: 50px;
-  background-color: #d9534f;
-  border-radius: 4px;
+.lobby-item {
+  background-color: #fff;
+  padding: 1rem;
+  border-radius: 6px;
+  box-shadow: 0 1px 3px rgba(0,0,0,0.1);
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  cursor: pointer;
+  transition: transform 0.2s;
+}
+
+.lobby-item:hover {
+  transform: translateY(-2px);
+}
+
+.host-name {
+  font-weight: bold;
+}
+
+.player-count {
+  color: #666;
+}
+
+.no-lobbies-message {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  height: 100%;
+  color: #888;
+  font-style: italic;
 }
 </style>

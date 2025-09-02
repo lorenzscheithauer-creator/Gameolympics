@@ -21,7 +21,12 @@ export const joinRandomLobby = () => {
   return apiClient.post('/join/random');
 };
 
+export const getLobbies = () => {
+  return apiClient.get('/list');
+};
+
 export default {
+  getLobbies,
   createLobby,
   joinLobby,
   joinRandomLobby,

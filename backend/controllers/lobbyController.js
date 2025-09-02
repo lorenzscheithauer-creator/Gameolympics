@@ -10,8 +10,26 @@ const generateLobbyCode = () => {
   for (let i = 0; i < 6; i++) {
     code += chars.charAt(Math.floor(Math.random() * chars.length));
   }
-  // TODO: Check for collisions in a real app
   return code;
+};
+
+// @desc    Get all public, non-full lobbies
+// @route   GET /api/lobbies
+// @access  Public
+const getPublicLobbies = async (req, res, next) => {
+  try {
+    const publicLobbies = lobbies
+      .filter(l => l.isPublic && l.players.length < MAX_PLAYERS)
+      .map(l => ({
+        lobbyCode: l.lobbyCode,
+        hostName: l.players[0]?.username || 'Unknown', // The first player is the host
+        playerCount: l.players.length,
+        maxPlayers: MAX_PLAYERS,
+      }));
+    res.status(200).json(publicLobbies);
+  } catch (error) {
+    next(error);
+  }
 };
 
 // @desc    Create a new lobby
@@ -130,6 +148,7 @@ const joinRandomLobby = async (req, res, next) => {
 };
 
 export {
+  getPublicLobbies,
   createLobby,
   joinLobby,
   joinRandomLobby,

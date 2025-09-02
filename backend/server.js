@@ -14,14 +14,14 @@ app.use(cors());
 app.use(express.json());
 app.use(express.urlencoded({ extended: true }));
 
+// API Routes
+app.use('/api/users', userRoutes);
+app.use('/api/lobbies', lobbyRoutes);
+
 // Serve frontend
 const __dirname = path.resolve();
 // server.js is in /backend, so we go up one level to the project root
 app.use(express.static(path.join(__dirname, '..', 'frontend')));
-
-// API Routes
-app.use('/api/users', userRoutes);
-app.use('/api/lobbies', lobbyRoutes);
 
 // Error Handling Middleware
 app.use(notFound);
