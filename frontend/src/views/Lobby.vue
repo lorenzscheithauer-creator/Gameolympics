@@ -7,9 +7,9 @@
     <main class="main-content">
       <div class="game-selection-area">
         <div class="game-grid">
-          <div v-for="n in 8" :key="n" class="game-tile" @click="logClick(`Game ${n}`)"></div>
+          <div v-for="n in 8" :key="n" class="game-tile"></div>
         </div>
-        <div class="wheel-of-fortune" @click="logClick('Wheel of Fortune')">
+        <div class="wheel-of-fortune">
           <p>Glücksrad</p>
         </div>
       </div>
@@ -39,13 +39,8 @@ const isPublic = ref(true);
 const username = ref('Benutzer');
 const router = useRouter();
 
-const logClick = (message: string) => {
-  console.log(`${message} clicked`);
-};
-
 const toggleLobbyType = () => {
   isPublic.value = !isPublic.value;
-  console.log(`Lobby type switched to: ${isPublic.value ? 'Public' : 'Private'}`);
 };
 
 const handleLogout = () => {
