@@ -1,92 +1,110 @@
 <template>
   <div class="page-container">
-    <h1 class="main-title">Gameolympics</h1>
-    <div class="games-section">
-      <div class="games-grid">
-        <button v-for="i in 8" :key="i" class="game-button" @click="logGameClick(i)">
-          Game{{ i }}
-        </button>
-      </div>
-      <div class="wheel-placeholder"></div>
-    </div>
-    <div class="lobby-section-header">
-      <h2 class="lobby-title">Lobby</h2>
-      <div class="lobby-actions">
-        <button class="action-button create-button" @click="showCreateModal = true">Create Lobby</button>
-        <button class="action-button join-button" @click="handleJoinClick">Join Lobby</button>
-      </div>
-    </div>
-    <div class="lobby-list-container">
-      <div v-if="lobbies.length > 0" class="lobby-list">
-        <div v-for="lobby in lobbies" :key="lobby.lobbyCode" class="lobby-item" @click="handleLobbyClick(lobby)">
-          <div class="lobby-info">
-            <span class="lobby-name">{{ lobby.lobbyName }}</span>
-            <span class="lobby-code">Code: {{ lobby.lobbyCode }}</span>
-          </div>
-          <span class="player-count">{{ lobby.playerCount }}/{{ lobby.maxPlayers }}</span>
-        </div>
-      </div>
-      <div v-else class="no-lobbies-message">
-        <p>No public lobbies available. Why not create one?</p>
-      </div>
-    </div>
+    <div v-if="currentLobby" class="in-lobby-view">
+      <h1 class="main-title">{{ currentLobby.lobbyName }}</h1>
+      <p class="lobby-code-display">Lobby Code: {{ currentLobby.lobbyCode }}</p>
 
-    <CreateLobbyModal v-if="showCreateModal" @close="showCreateModal = false; fetchLobbies()" />
-    <JoinLobbyModal
-      v-if="showJoinModal"
-      :initial-lobby-code="selectedLobbyCode"
-      @close="showJoinModal = false; fetchLobbies()"
-    />
+      <div class="players-list">
+        <h2>Players ({{ currentLobby.players.length }} / 6)</h2>
+        <ul>
+          <li v-for="player in currentLobby.players" :key="player.id">
+            {{ player.username }} <span v-if="player.id === currentLobby.hostId">(Host)</span>
+          </li>
+        </ul>
+      </div>
+
+      <div class="lobby-actions">
+        <button
+          v-if="isHost"
+          @click="startGame"
+          :disabled="currentLobby.players.length < 2"
+          class="action-button start-game-button"
+        >
+          Start Game
+        </button>
+        <button @click="leaveLobby" class="action-button leave-lobby-button">Leave Lobby</button>
+      </div>
+    </div>
+    <div v-else>
+      <h1 class="main-title">You are not in a lobby</h1>
+      <p>Create or join a lobby to start playing.</p>
+      <!-- In a real application, we would have buttons here to create or join a lobby -->
+    </div>
   </div>
 </template>
 
 <script setup lang="ts">
-import { ref, onMounted, onUnmounted } from 'vue';
-import CreateLobbyModal from '../components/CreateLobbyModal.vue';
-import JoinLobbyModal from '../components/JoinLobbyModal.vue';
+import { ref, onMounted, onUnmounted, computed } from 'vue';
 import lobbyService from '../services/lobbyService';
+
+interface Player {
+  id: string;
+  username: string;
+}
 
 interface Lobby {
   lobbyCode: string;
   lobbyName: string;
-  playerCount: number;
-  maxPlayers: number;
+  players: Player[];
+  hostId: string;
+  gameStarted?: boolean;
 }
 
-const showCreateModal = ref(false);
-const showJoinModal = ref(false);
-const selectedLobbyCode = ref('');
-const lobbies = ref<Lobby[]>([]);
+interface User {
+  id: string;
+  username: string;
+  token: string;
+}
+
+const currentLobby = ref<Lobby | null>(null);
+const currentUser = ref<User | null>(null);
 let pollingInterval: number | undefined;
 
-const logGameClick = (gameNumber: number) => {
-  console.log(`Game ${gameNumber} clicked`);
-};
+const isHost = computed(() => {
+  if (!currentLobby.value || !currentUser.value) return false;
+  return currentLobby.value.hostId === currentUser.value.id;
+});
 
-const fetchLobbies = async () => {
+const fetchCurrentLobby = async () => {
   try {
-    const response = await lobbyService.getLobbies();
-    lobbies.value = response.data;
+    const response = await lobbyService.getCurrentLobby();
+    currentLobby.value = response.data;
   } catch (error) {
-    console.error('Failed to fetch lobbies:', error);
-    // Gracefully fail - don't show an error to the user, just an empty list.
-    lobbies.value = [];
+    console.log('Not currently in a lobby.');
+    currentLobby.value = null;
   }
 };
 
-const handleJoinClick = () => {
-  selectedLobbyCode.value = '';
-  showJoinModal.value = true;
+const startGame = async () => {
+  if (!currentLobby.value) return;
+  try {
+    const response = await lobbyService.startGame(currentLobby.value.lobbyCode);
+    console.log('Game started:', response.data);
+    if (currentLobby.value) {
+      currentLobby.value = response.data;
+    }
+  } catch (error) {
+    console.error('Failed to start game:', error);
+  }
 };
 
-const handleLobbyClick = (lobby: Lobby) => {
-  selectedLobbyCode.value = lobby.lobbyCode;
-  showJoinModal.value = true;
+const leaveLobby = async () => {
+  try {
+    await lobbyService.leaveLobby();
+    currentLobby.value = null;
+  } catch (error) {
+    console.error('Failed to leave lobby:', error);
+  }
 };
 
 onMounted(() => {
-  fetchLobbies();
-  pollingInterval = window.setInterval(fetchLobbies, 5000);
+  const storedUser = localStorage.getItem('user');
+  if (storedUser) {
+    currentUser.value = JSON.parse(storedUser);
+  }
+
+  fetchCurrentLobby();
+  pollingInterval = window.setInterval(fetchCurrentLobby, 3000); // Poll for updates
 });
 
 onUnmounted(() => {
@@ -110,50 +128,43 @@ onUnmounted(() => {
   font-size: 3.5rem;
   font-weight: bold;
   color: #333;
-  margin-bottom: 3rem;
+  margin-bottom: 1rem;
 }
-.games-section {
-  display: flex;
-  justify-content: center;
-  align-items: flex-start;
-  gap: 3rem;
-  margin-bottom: 3rem;
-}
-.games-grid {
-  display: grid;
-  grid-template-columns: repeat(4, 1fr);
-  gap: 1.5rem;
-}
-.game-button {
-  width: 120px;
-  height: 120px;
-  background-color: black;
-  color: white;
-  border: none;
-  border-radius: 8px;
-  font-size: 1.2rem;
-  font-weight: bold;
-  cursor: pointer;
-}
-.wheel-placeholder {
-  width: 160px;
-  height: 160px;
-  background-color: #E0E0E0;
-  border-radius: 50%;
-  border: 4px solid #C0C0C0;
-}
-.lobby-section-header {
+.in-lobby-view {
   width: 100%;
-  max-width: 980px;
+  max-width: 600px;
   display: flex;
-  justify-content: space-between;
+  flex-direction: column;
   align-items: center;
-  margin-bottom: 1.5rem;
 }
-.lobby-title {
-  font-size: 2.5rem;
-  color: #333;
-  margin: 0;
+.lobby-code-display {
+  font-family: monospace;
+  font-size: 1.2rem;
+  color: #555;
+  background-color: #eee;
+  padding: 0.5rem 1rem;
+  border-radius: 4px;
+  margin-bottom: 2rem;
+}
+.players-list {
+  width: 100%;
+  margin-bottom: 2rem;
+}
+.players-list h2 {
+  font-size: 1.8rem;
+  margin-bottom: 1rem;
+}
+.players-list ul {
+  list-style: none;
+  padding: 0;
+}
+.players-list li {
+  background-color: #fff;
+  padding: 1rem;
+  border-radius: 6px;
+  box-shadow: 0 1px 3px rgba(0,0,0,0.1);
+  margin-bottom: 0.5rem;
+  font-size: 1.1rem;
 }
 .lobby-actions {
   display: flex;
@@ -168,68 +179,14 @@ onUnmounted(() => {
   font-weight: bold;
   cursor: pointer;
 }
-.create-button {
+.start-game-button {
   background-color: #3cb371;
 }
-.join-button {
-  background-color: #4a90e2;
+.start-game-button:disabled {
+  background-color: #9e9e9e;
+  cursor: not-allowed;
 }
-.lobby-list-container {
-  width: 100%;
-  max-width: 980px;
-  background-color: #f0f0f0;
-  border-radius: 8px;
-  padding: 1rem;
-  min-height: 150px;
-}
-.lobby-list {
-  display: grid;
-  grid-template-columns: repeat(auto-fill, minmax(300px, 1fr));
-  gap: 1rem;
-}
-.lobby-item {
-  background-color: #fff;
-  padding: 1rem;
-  border-radius: 6px;
-  box-shadow: 0 1px 3px rgba(0,0,0,0.1);
-  display: flex;
-  justify-content: space-between;
-  align-items: center;
-  cursor: pointer;
-  transition: transform 0.2s;
-}
-.lobby-item:hover {
-  transform: translateY(-2px);
-}
-.lobby-info {
-  display: flex;
-  flex-direction: column;
-  align-items: flex-start;
-}
-.lobby-name {
-  font-weight: bold;
-  font-size: 1.1rem;
-  margin-bottom: 0.25rem;
-}
-.lobby-code {
-  font-family: monospace;
-  font-size: 0.9rem;
-  color: #555;
-  background-color: #eee;
-  padding: 0.2rem 0.4rem;
-  border-radius: 4px;
-}
-.player-count {
-  font-weight: bold;
-  font-size: 1.1rem;
-  color: #333;
-}
-.no-lobbies-message {
-  display: flex;
-  justify-content: center;
-  align-items: center;
-  height: 100%;
-  color: #888;
-  font-style: italic;
+.leave-lobby-button {
+  background-color: #f44336;
 }
 </style>

@@ -28,9 +28,24 @@ export const joinRandomLobby = () => {
   return apiClient.post('/join/random', null, { headers: getAuthHeaders() });
 };
 
+export const startGame = (lobbyCode: string) => {
+  return apiClient.post(`/${lobbyCode}/start`, null, { headers: getAuthHeaders() });
+};
+
+export const getCurrentLobby = () => {
+  return apiClient.get('/current', { headers: getAuthHeaders() });
+};
+
+export const leaveLobby = () => {
+  return apiClient.post('/leave', null, { headers: getAuthHeaders() });
+};
+
 export default {
   getLobbies,
   createLobby,
   joinLobby,
   joinRandomLobby,
+  startGame,
+  getCurrentLobby,
+  leaveLobby,
 };
