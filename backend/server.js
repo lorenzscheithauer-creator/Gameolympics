@@ -2,6 +2,7 @@ import express from 'express';
 import cors from 'cors';
 import path from 'path';
 import userRoutes from './routes/userRoutes.js';
+import lobbyRoutes from './routes/lobbyRoutes.js';
 import { notFound, errorHandler } from './middleware/errorMiddleware.js';
 import db from './config/db.js'; // Import to initialize the db connection
 
@@ -12,6 +13,10 @@ const port = 3000;
 app.use(cors());
 app.use(express.json());
 app.use(express.urlencoded({ extended: true }));
+
+// API Routes
+app.use('/api/users', userRoutes);
+app.use('/api/lobbies', lobbyRoutes);
 
 // Serve frontend
 const __dirname = path.resolve();
