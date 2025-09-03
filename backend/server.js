@@ -23,6 +23,9 @@ const __dirname = path.resolve();
 // server.js is in /backend, so we go up one level to the project root
 app.use(express.static(path.join(__dirname, '..', 'frontend')));
 
+// API Routes
+app.use('/api/users', userRoutes);
+
 // Error Handling Middleware
 app.use(notFound);
 app.use(errorHandler);

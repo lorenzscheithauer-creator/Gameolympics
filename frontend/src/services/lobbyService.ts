@@ -1,28 +1,31 @@
 import axios from 'axios';
 
-// Create an Axios instance for API requests to the lobby endpoints
+const getAuthHeaders = () => {
+  const token = localStorage.getItem('token');
+  return token ? { Authorization: `Bearer ${token}` } : {};
+};
+
 const apiClient = axios.create({
-  baseURL: 'http://localhost:3000/api/lobbies', // Backend lobby API base URL
+  baseURL: 'http://localhost:3000/api/lobbies',
   headers: {
     'Content-Type': 'application/json',
-    // TODO: Add Authorization header with token if needed
   },
 });
 
+export const getLobbies = () => {
+  return apiClient.get('/', { headers: getAuthHeaders() });
+};
+
 export const createLobby = (lobbyData: { lobbyName: string; isPublic: boolean; password?: string }) => {
-  return apiClient.post('/create', lobbyData);
+  return apiClient.post('/create', lobbyData, { headers: getAuthHeaders() });
 };
 
 export const joinLobby = (joinData: { lobbyCode: string; password?: string }) => {
-  return apiClient.post('/join', joinData);
+  return apiClient.post('/join/code', joinData, { headers: getAuthHeaders() });
 };
 
 export const joinRandomLobby = () => {
-  return apiClient.post('/join/random');
-};
-
-export const getLobbies = () => {
-  return apiClient.get('/list');
+  return apiClient.post('/join/random', null, { headers: getAuthHeaders() });
 };
 
 export default {

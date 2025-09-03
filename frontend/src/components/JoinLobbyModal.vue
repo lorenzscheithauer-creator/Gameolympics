@@ -7,18 +7,18 @@
           :class="{ active: joinType === 'code' }"
           @click="setJoinType('code')"
         >
-          Gruppe mit Code beitreten
+          Join with Code
         </button>
         <button
           :class="{ active: joinType === 'random' }"
           @click="setJoinType('random')"
         >
-          Zufälliger Gruppe beitreten
+          Join Random
         </button>
       </div>
       <div v-if="joinType === 'code'" class="code-section">
-        <input type="text" v-model="lobbyCodeInput" placeholder="Lobby-Code" />
-        <input type="password" v-model="password" placeholder="Passwort (falls benötigt)" />
+        <input type="text" v-model="lobbyCode" placeholder="Lobby Code" />
+        <input type="password" v-model="password" placeholder="Password (if required)" />
       </div>
       <div v-if="errorMessage" class="error-message">{{ errorMessage }}</div>
       <div class="modal-actions">
@@ -40,14 +40,14 @@ const props = defineProps<{
 const emit = defineEmits(['close']);
 
 const joinType = ref('code');
-const lobbyCodeInput = ref('');
+const lobbyCode = ref('');
 const password = ref('');
 const errorMessage = ref('');
 
 onMounted(() => {
   if (props.initialLobbyCode) {
     joinType.value = 'code';
-    lobbyCodeInput.value = props.initialLobbyCode;
+    lobbyCode.value = props.initialLobbyCode;
   }
 });
 
@@ -62,11 +62,11 @@ const handleJoinLobby = async () => {
     if (joinType.value === 'random') {
       response = await lobbyService.joinRandomLobby();
     } else {
-      if (!lobbyCodeInput.value) {
+      if (!lobbyCode.value) {
         errorMessage.value = 'Lobby code is required.';
         return;
       }
-      const joinData: { lobbyCode: string; password?: string } = { lobbyCode: lobbyCodeInput.value };
+      const joinData: { lobbyCode: string; password?: string } = { lobbyCode: lobbyCode.value };
       if (password.value) {
         joinData.password = password.value;
       }
@@ -85,7 +85,6 @@ const handleJoinLobby = async () => {
 </script>
 
 <style scoped>
-/* Styles are unchanged, but included for completeness */
 .modal-overlay {
   position: fixed;
   top: 0;
@@ -98,7 +97,6 @@ const handleJoinLobby = async () => {
   align-items: center;
   z-index: 1000;
 }
-
 .modal-content {
   background-color: white;
   padding: 2rem;
@@ -108,23 +106,19 @@ const handleJoinLobby = async () => {
   box-shadow: 0 5px 15px rgba(0,0,0,0.3);
   text-align: center;
 }
-
 h3 {
   margin-top: 0;
   font-size: 1.8rem;
   margin-bottom: 1.5rem;
 }
-
 .options {
   display: flex;
-  flex-direction: column;
-  align-items: center;
+  justify-content: center;
   gap: 1rem;
   margin-bottom: 1.5rem;
 }
-
 .options button {
-  width: 80%;
+  width: 50%;
   padding: 0.8rem 1.2rem;
   border: 1px solid #ccc;
   background-color: #f0f0f0;
@@ -132,13 +126,11 @@ h3 {
   cursor: pointer;
   font-size: 1rem;
 }
-
 .options button.active {
   background-color: #4a90e2;
   color: white;
   border-color: #4a90e2;
 }
-
 .code-section {
   margin-bottom: 1.5rem;
   display: flex;
@@ -146,26 +138,22 @@ h3 {
   align-items: center;
   gap: 1rem;
 }
-
 .code-section input {
-  width: 80%;
+  width: 90%;
   padding: 0.8rem;
   border: 1px solid #ccc;
   border-radius: 4px;
   font-size: 1rem;
 }
-
 .error-message {
   color: #d9534f;
   margin-bottom: 1rem;
 }
-
 .modal-actions {
   display: flex;
   justify-content: flex-end;
   gap: 1rem;
 }
-
 .modal-actions button {
   padding: 0.7rem 1.5rem;
   border: none;
@@ -174,11 +162,9 @@ h3 {
   font-size: 1rem;
   font-weight: bold;
 }
-
 .cancel-button {
   background-color: #ccc;
 }
-
 .join-button {
   background-color: #3cb371;
   color: white;

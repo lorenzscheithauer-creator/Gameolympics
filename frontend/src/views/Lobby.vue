@@ -31,11 +31,11 @@
       </div>
     </div>
 
-    <CreateLobbyModal v-if="showCreateModal" @close="showCreateModal = false" />
+    <CreateLobbyModal v-if="showCreateModal" @close="showCreateModal = false; fetchLobbies()" />
     <JoinLobbyModal
       v-if="showJoinModal"
       :initial-lobby-code="selectedLobbyCode"
-      @close="showJoinModal = false"
+      @close="showJoinModal = false; fetchLobbies()"
     />
   </div>
 </template>
@@ -69,6 +69,8 @@ const fetchLobbies = async () => {
     lobbies.value = response.data;
   } catch (error) {
     console.error('Failed to fetch lobbies:', error);
+    // Gracefully fail - don't show an error to the user, just an empty list.
+    lobbies.value = [];
   }
 };
 
@@ -104,14 +106,12 @@ onUnmounted(() => {
   min-height: 100vh;
   font-family: 'Helvetica Neue', Arial, sans-serif;
 }
-
 .main-title {
   font-size: 3.5rem;
   font-weight: bold;
   color: #333;
   margin-bottom: 3rem;
 }
-
 .games-section {
   display: flex;
   justify-content: center;
@@ -119,13 +119,11 @@ onUnmounted(() => {
   gap: 3rem;
   margin-bottom: 3rem;
 }
-
 .games-grid {
   display: grid;
   grid-template-columns: repeat(4, 1fr);
   gap: 1.5rem;
 }
-
 .game-button {
   width: 120px;
   height: 120px;
@@ -136,11 +134,7 @@ onUnmounted(() => {
   font-size: 1.2rem;
   font-weight: bold;
   cursor: pointer;
-  display: flex;
-  justify-content: center;
-  align-items: center;
 }
-
 .wheel-placeholder {
   width: 160px;
   height: 160px;
@@ -148,7 +142,6 @@ onUnmounted(() => {
   border-radius: 50%;
   border: 4px solid #C0C0C0;
 }
-
 .lobby-section-header {
   width: 100%;
   max-width: 980px;
@@ -157,18 +150,15 @@ onUnmounted(() => {
   align-items: center;
   margin-bottom: 1.5rem;
 }
-
 .lobby-title {
   font-size: 2.5rem;
   color: #333;
   margin: 0;
 }
-
 .lobby-actions {
   display: flex;
   gap: 1rem;
 }
-
 .action-button {
   color: white;
   border: none;
@@ -177,17 +167,13 @@ onUnmounted(() => {
   font-size: 1rem;
   font-weight: bold;
   cursor: pointer;
-  box-shadow: 0 2px 4px rgba(0,0,0,0.1);
 }
-
 .create-button {
   background-color: #3cb371;
 }
-
 .join-button {
   background-color: #4a90e2;
 }
-
 .lobby-list-container {
   width: 100%;
   max-width: 980px;
@@ -196,13 +182,11 @@ onUnmounted(() => {
   padding: 1rem;
   min-height: 150px;
 }
-
 .lobby-list {
   display: grid;
   grid-template-columns: repeat(auto-fill, minmax(300px, 1fr));
   gap: 1rem;
 }
-
 .lobby-item {
   background-color: #fff;
   padding: 1rem;
@@ -214,23 +198,19 @@ onUnmounted(() => {
   cursor: pointer;
   transition: transform 0.2s;
 }
-
 .lobby-item:hover {
   transform: translateY(-2px);
 }
-
 .lobby-info {
   display: flex;
   flex-direction: column;
   align-items: flex-start;
 }
-
 .lobby-name {
   font-weight: bold;
   font-size: 1.1rem;
   margin-bottom: 0.25rem;
 }
-
 .lobby-code {
   font-family: monospace;
   font-size: 0.9rem;
@@ -239,13 +219,11 @@ onUnmounted(() => {
   padding: 0.2rem 0.4rem;
   border-radius: 4px;
 }
-
 .player-count {
   font-weight: bold;
   font-size: 1.1rem;
   color: #333;
 }
-
 .no-lobbies-message {
   display: flex;
   justify-content: center;

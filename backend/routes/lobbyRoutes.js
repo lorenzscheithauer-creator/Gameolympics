@@ -1,12 +1,19 @@
 import express from 'express';
-import { getPublicLobbies, createLobby, joinLobby, joinRandomLobby } from '../controllers/lobbyController.js';
 import { protect } from '../middleware/authMiddleware.js';
+import { getPublicLobbies, createLobby, joinLobby, joinRandomLobby } from '../controllers/lobbyController.js';
 
 const router = express.Router();
 
-router.get('/list', getPublicLobbies); // This can remain public
+// Get list of public lobbies
+router.get('/', getPublicLobbies);
+
+// Create a new lobby
 router.post('/create', protect, createLobby);
-router.post('/join', protect, joinLobby);
+
+// Join a lobby by code
+router.post('/join/code', protect, joinLobby);
+
+// Join a random lobby
 router.post('/join/random', protect, joinRandomLobby);
 
 export default router;
